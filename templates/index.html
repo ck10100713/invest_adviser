@@ -1,18 +1,11 @@
 <!-- index.html -->
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Investment Platform</title>
-</head>
-<body>
+{% extends "base.html" %}
+{% block title %} Investment Platform {% endblock %}
+{% block content %}
     <h1>Welcome to Investment Platform</h1>
     <p>Hello Investor</p>
     <div>
         <a href="{% url 'login' %}">Login</a>
         <a href="{% url 'register' %}">Register</a>
     </div>
-</body>
-</html>
+{% endblock %}
