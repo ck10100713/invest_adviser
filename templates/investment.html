@@ -1,0 +1,16 @@
+<form method="post">
+    {% csrf_token %}
+    <label for="amount">Amount:</label>
+    <input type="text" id="amount" name="amount" required><br><br>
+    
+    <label for="duration">Duration (months):</label>
+    <input type="text" id="duration" name="duration" required><br><br>
+    
+    <label for="interest_rate">Interest Rate (%):</label>
+    <input type="text" id="interest_rate" name="interest_rate" required><br><br>
+    
+    <label for="start_date">Start Date:</label>
+    <input type="date" id="start_date" name="start_date" required><br><br>
+    
+    <button type="submit">Calculate</button>
+</form>

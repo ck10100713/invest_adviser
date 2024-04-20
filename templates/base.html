@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head>
+        <meta charset="utf-8">
+        <title>{% block title %} {% endblock %}</title>
+    </head>
+    <body>
+        <header>
+            {% block branding %}
+            <h1>My Site</h1>
+            {% endblock %}
+        </header>
+        <nav>
+            {% block nav-global %}
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/about">About</a></li>
+                <li><a href="/contact">Contact</a></li>
+            </ul>
+            {% endblock %}
+        </nav>
+        <main>
+            {% block content %}
+            {% endblock %}
+        </main>
+        <footer>
+            {% block footer %}
+            <p>&copy; 2021 My Site</p>
+            {% endblock %}
+        </footer>
+    </body>
+    </html>
