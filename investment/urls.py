@@ -19,5 +19,7 @@ from django.urls import path, include
 from . import views
 
 urlpatterns = [
-    path('', views.index, name='home'),
+    path('', views.investment, name='investment'),
+    path('investment/', views.investment_controller, name='investment'),
+    path('toggle_mode/', views.toggle_mode, name='toggle_mode'),
 ]
