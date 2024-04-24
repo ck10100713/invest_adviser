@@ -2,19 +2,15 @@ from django.db import models
 
 # Create your models here.
 class Investment(models.Model):
-    name = models.CharField(max_length=100)
-    amount = models.FloatField()
-    interest_rate = models.FloatField()
-    duration = models.IntegerField()
-    result = models.FloatField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    # db column = [stock_id, open, high, low, close, volume, date]
+    stock_id = models.CharField(max_length=10)
+    open = models.FloatField()
+    high = models.FloatField()
+    low = models.FloatField()
+    close = models.FloatField()
+    volume = models.FloatField()
+    date = models.DateField()
 
-    def calculate(self):
-        self.result = self.amount * (1 + self.rate / 100 * self.time)
-        return self.result
-    
-    # def __str__(self):
-    #     return self.name
     def __str__(self):
-        return f"Investment: {self.amount} for {self.duration} months at {self.interest_rate}%"
+        return f"{self.stock_id} on {self.date}"
+    
