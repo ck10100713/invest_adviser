@@ -17,7 +17,9 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from . import views
+from .views import calculate_returns
 
 urlpatterns = [
     path('', views.investment, name='investment'),
+    path('calculate/', calculate_returns, name='calculate_returns'),
 ]

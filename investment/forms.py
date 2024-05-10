@@ -11,7 +11,12 @@ class InvestmentForm(forms.Form):
     updated_at = forms.DateTimeField(label=_('Updated At'), required=False)
     
     def calculate(self):
-        self.result = self.amount * (1 + self.rate / 100 * self.time)
+        self.result = self.amount * (1 + self.interest_rate / 100 * self.duration)
         return self.result
     def __str__(self):
-        return f"Investment: {self.amount} for {self.duration} months at {self.interest_rate}%"
+        return self.result
+
+class ReturnCalculatorForm(forms.Form):
+    amount = forms.DecimalField(label="Investment Amount", max_digits=12, decimal_places=2)
+    months = forms.IntegerField(label="Number of Months")
+    rate = forms.DecimalField(label="Expected Return Rate (%)", max_digits=5, decimal_places=2)
