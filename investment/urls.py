@@ -1,25 +1,9 @@
-"""
-URL configuration for invest_adviser project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.0/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
 from django.urls import path, include
-from . import views
-from .views import calculate_returns
+from .views import investment, calculate_and_show_results, calculate_dollar_cost_averaging
 
 urlpatterns = [
-    path('', views.investment, name='investment'),
-    path('calculate/', calculate_returns, name='calculate_returns'),
+    path('', investment, name='investment'),
+    path('calculate/', calculate_and_show_results, name='calculate_view'),
+    path('dollar-cost-averaging/', calculate_dollar_cost_averaging, name='dollar_cost_averaging_view'),
 ]

@@ -9,7 +9,7 @@ class InvestmentForm(forms.Form):
     result = forms.FloatField(label=_('Result'), required=False)
     created_at = forms.DateTimeField(label=_('Created At'), required=False)
     updated_at = forms.DateTimeField(label=_('Updated At'), required=False)
-    
+
     def calculate(self):
         self.result = self.amount * (1 + self.interest_rate / 100 * self.duration)
         return self.result
@@ -20,3 +20,8 @@ class ReturnCalculatorForm(forms.Form):
     amount = forms.DecimalField(label="Investment Amount", max_digits=12, decimal_places=2)
     months = forms.IntegerField(label="Number of Months")
     rate = forms.DecimalField(label="Expected Return Rate (%)", max_digits=5, decimal_places=2)
+
+# class DollarCostAveragingForm(forms.Form):
+#     amount = forms.DecimalField(label="Investment Amount", max_digits=12, decimal_places=2)
+#     months = forms.IntegerField(label="Number of Months")
+#     rate = forms.DecimalField(label="Expected Return Rate (%)", max_digits=5, decimal_places=2)

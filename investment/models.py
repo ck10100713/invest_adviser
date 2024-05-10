@@ -13,4 +13,3 @@ class Investment(models.Model):
 
     def __str__(self):
         return f"{self.stock_id} on {self.date}"
-    

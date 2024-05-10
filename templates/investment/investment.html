@@ -1,46 +1,25 @@
-<!-- investment/investment.html -->
-{% extends "base.html" %}
 <!-- investment.html -->
-<!DOCTYPE html>
-<html lang="en">
-{% block content %}
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Investment Page</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-</head>
-</html>
+{% extends 'base.html' %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Investment Page</title>
-</head>
-<body>
-    <h1>Regular Investment Mode</h1>
-    <!-- 普通模式的內容 -->
-    <form method="post">
-        {% csrf_token %}
-        <label for="amount">Amount:</label>
-        <input type="text" id="amount" name="amount" required><br><br>
-        
-        <label for="duration">Duration (months):</label>
-        <input type="text" id="duration" name="duration" required><br><br>
-        
-        <label for="interest_rate">Interest Rate (%):</label>
-        <input type="text" id="interest_rate" name="interest_rate" required><br><br>
-        
-        <label for="start_date">Start Date:</label>
-        <input type="date" id="start_date" name="start_date" required><br><br>
-        
-        <button type="submit">Calculate</button>
-    </form>
-    {% if result %}
-    <h2>Result:</h2>
-    <p>Interest: {{ result.interest }}</p>
-    <p>Total Amount: {{ result.total_amount }}</p>
-    {% endif %}
-</body>
-</html>
+{% block title %}Investment Page{% endblock %}
+
+{% block head %}
+    <style>
+        .button {
+            padding: 10px;
+            margin: 5px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <h2>Investment Services</h2>
+    <p>Welcome to our investment services page. Choose an option below to continue:</p>
+    <a href="/investment/calculate/" class="button">Calculate Returns</a><br>
+    <a href="/investment/dollar-cost-averaging/" class="button">dollar-cost-averaging</a>
 {% endblock %}
