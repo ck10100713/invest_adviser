@@ -20,8 +20,3 @@ class ReturnCalculatorForm(forms.Form):
     amount = forms.DecimalField(label="Investment Amount", max_digits=12, decimal_places=2)
     months = forms.IntegerField(label="Number of Months")
     rate = forms.DecimalField(label="Expected Return Rate (%)", max_digits=5, decimal_places=2)
-
-# class DollarCostAveragingForm(forms.Form):
-#     amount = forms.DecimalField(label="Investment Amount", max_digits=12, decimal_places=2)
-#     months = forms.IntegerField(label="Number of Months")
-#     rate = forms.DecimalField(label="Expected Return Rate (%)", max_digits=5, decimal_places=2)
