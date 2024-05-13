@@ -4,6 +4,7 @@ path = os.path.join(os.path.dirname(__file__), 'data.csv')
 os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 import django
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'investment.settings')
 django.setup()
 from investment.models import StockData
 data = csv.reader(open(path), delimiter=',')
