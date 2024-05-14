@@ -1,0 +1,23 @@
+<!-- stock_list.html -->
+{% extends 'base.html' %}
+
+<!DOCTYPE html>
+<html lang="en">
+{% block head %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock List</title>
+</head>
+{% endblock %}
+{% block content %}
+<body>
+    <h1>Stock List</h1>
+    <ul>
+        {% for ticker in ticker_list %}
+            <li>{{ ticker }}</li>
+        {% endfor %}
+    </ul>
+</body>
+{% endblock %}
+</html>
