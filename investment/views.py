@@ -63,11 +63,12 @@ def stock_list(request):
     return render(request, 'investment/stock_list.html', {'ticker_list': ticker_list})
 
 def stock_detail(request, ticker):
-    # 根据股票标识符查询股票详情数据，这里假设 StockData 模型中有一个名为 ticker 的字段
-    # 在这里编写你的代码来获取股票详情数据
-    # 例如：
-    # stock_data = StockData.objects.get(ticker=ticker)
-
-    # 将股票详情数据传递给模板
-    stock_data = 'test'
-    return render(request, 'stock_detail.html', {'ticker': ticker, 'stock_data': stock_data})
+    # 获取股票的最新日期、收盘价和成交量
+    latest_data = StockData.objects.filter(Ticker=ticker).latest('Date')
+    # 将数据传递给模板
+    return render(request, 'investment/stock_list/stock_detail.html', {
+        'ticker': ticker,
+        'latest_date': latest_data.Date,
+        'latest_close': latest_data.Close,
+        'latest_volume': latest_data.Volume
+    })

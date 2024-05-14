@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Stock Detail for {{ ticker }}</h1>
+    <p>Date: {{ latest_date }}</p>
+    <p>Close Price: {{ latest_close }}</p>
+    <p>Volume: {{ latest_volume }}</p>
+{% endblock %}
