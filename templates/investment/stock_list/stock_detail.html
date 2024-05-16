@@ -1,3 +1,4 @@
+<!-- stock_detail.html -->
 {% extends 'base.html' %}
 
 {% block content %}
@@ -5,4 +6,5 @@
     <p>Date: {{ latest_date }}</p>
     <p>Close Price: {{ latest_close }}</p>
     <p>Volume: {{ latest_volume }}</p>
+    <img src="data:image/png;base64,{{ graphic }}" alt="Stock Chart">
 {% endblock %}
