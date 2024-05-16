@@ -134,3 +134,6 @@ def stock_detail(request, ticker):
         'latest_volume': latest_volume,
         'graphic': image_data  # 将图表的 base64 编码字符串传递给模板
     })
+
+def backtest(request):
+    return render(request, 'investment/backtest.html')

@@ -11,4 +11,5 @@ urlpatterns = [
     path('dollar-cost-averaging/', views.calculate_dollar_cost_averaging, name='dollar_cost_averaging_view'),
     path('stock-list/', views.stock_list, name='stock_list'),
     path('stock-detail/<str:ticker>/', views.stock_detail, name='stock_detail'),
+    path('backtest/', views.backtest, name='backtest'),
 ]

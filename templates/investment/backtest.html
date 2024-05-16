@@ -1,0 +1,66 @@
+<!-- backtest.html -->
+{% extends 'base.html' %}
+
+{% block title %}Backtest Page{% endblock %}
+
+{% block head %}
+    <style>
+        .button {
+            padding: 10px;
+            margin: 5px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <h2>Backtest Services</h2>
+    <p>Welcome to our investment services page. Choose an option below to continue:</p>
+
+    <form method="post" action="{% url 'backtest_submit' %}">
+        {% csrf_token %}
+
+        <label for="stock_list">Stock List:</label>
+        <select id="stock_list" name="stock_list">
+            {% for ticker in tickers %}
+                <option value="{{ ticker }}">{{ ticker }}</option>
+            {% endfor %}
+        </select>
+        <br><br>
+
+        <label for="backtest_type">Backtest Type:</label>
+        <select id="backtest_type" name="backtest_type">
+            <option value="avg">Average</option>
+        </select>
+        <br><br>
+
+        <div id="avg_backtest_form" style="display: none;">
+            <label for="days">Days:</label>
+            <input type="number" id="days" name="days" min="1" max="30">
+            <br><br>
+
+            <label for="amount">Amount:</label>
+            <input type="number" id="amount" name="amount" min="1">
+            <br><br>
+        </div>
+
+        <input type="submit" value="Submit" class="button">
+    </form>
+
+    <script>
+        // 监听 backtest_type 下拉框的变化事件
+        document.getElementById("backtest_type").addEventListener("change", function() {
+            // 如果 backtest_type 为 "avg"，则显示 avg_backtest_form
+            if (this.value === "avg") {
+                document.getElementById("avg_backtest_form").style.display = "block";
+            } else {
+                // 否则隐藏 avg_backtest_form
+                document.getElementById("avg_backtest_form").style.display = "none";
+            }
+        });
+    </script>
+{% endblock %}
