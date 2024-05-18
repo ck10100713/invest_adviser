@@ -9,6 +9,7 @@ import urllib
 from django.http import HttpResponse
 import os
 import base64
+import datetime as dt
 
 # Create your views here.
 def investment(request):
@@ -64,6 +65,25 @@ def calculate_dollar_cost_averaging(request):
         context = {'form': form, 'result': False}
 
     return render(request, 'investment/calculate_and_result.html', context)
+
+def import_data_view(request):
+    if request.method == 'POST':
+        ticker = request.POST.get('ticker')
+        start_date = request.POST.get('start_date')
+        end_date = request.POST.get('end_date')
+
+        # 這裡你可以添加邏輯來處理表單數據，例如導入數據到資料庫
+        # 假設這裡是導入數據的邏輯
+        start_date = dt.datetime.strptime(start_date, '%Y-%m-%d')
+        end_date = dt.datetime.strptime(end_date, '%Y-%m-%d')
+        
+        # 示例：打印出來
+        print(f'導入數據：{ticker}, 從 {start_date} 到 {end_date}')
+        
+        # 返回導入成功的信息
+        return HttpResponse("Data import successful.")
+    
+    return render(request, 'investment/import_data.html')
 
 def stock_list(request):
     ticker_list = StockData.objects.values_list('Ticker', flat=True).distinct()
@@ -136,4 +156,10 @@ def stock_detail(request, ticker):
     })
 
 def backtest(request):
-    return render(request, 'investment/backtest.html')
+    tickers = StockData.objects.values_list('Ticker', flat=True).distinct()
+    show_avg_form = False
+    if request.method == 'POST':
+        backtest_type = request.POST.get('backtest_type')
+        if backtest_type == 'avg':
+            show_avg_form = True
+    return render(request, 'investment/backtest.html', {'tickers': tickers, 'show_avg_form': show_avg_form})
