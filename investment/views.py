@@ -10,6 +10,8 @@ from django.http import HttpResponse
 import os
 import base64
 import datetime as dt
+import pandas as pd
+import yfinance as yf
 
 # Create your views here.
 def investment(request):
@@ -66,23 +68,46 @@ def calculate_dollar_cost_averaging(request):
 
     return render(request, 'investment/calculate_and_result.html', context)
 
+def get_data(ticker, stt, edd):
+    ticker = ticker.upper()
+    data = yf.download(ticker, start = stt, end = edd)
+    data['Ticker'] = ticker
+    data = data.reset_index()
+    data['Date'] = pd.to_datetime(data['Date'])
+    data['Date'] = data['Date'].dt.strftime('%Y-%m-%d')
+    data = data.reindex(columns=['Ticker', 'Date', 'Open', 'High', 'Low', 'Close', 'Volume'])
+    return data
+
 def import_data_view(request):
     if request.method == 'POST':
         ticker = request.POST.get('ticker')
         start_date = request.POST.get('start_date')
         end_date = request.POST.get('end_date')
-
-        # 這裡你可以添加邏輯來處理表單數據，例如導入數據到資料庫
-        # 假設這裡是導入數據的邏輯
-        start_date = dt.datetime.strptime(start_date, '%Y-%m-%d')
-        end_date = dt.datetime.strptime(end_date, '%Y-%m-%d')
-        
-        # 示例：打印出來
-        print(f'導入數據：{ticker}, 從 {start_date} 到 {end_date}')
-        
-        # 返回導入成功的信息
-        return HttpResponse("Data import successful.")
-    
+        try:
+            data = get_data(ticker, start_date, end_date)
+            for item in data.itertuples():
+                ticker = item.Ticker
+                date = item.Date
+                open_price = float(item.Open)
+                high_price = float(item.High)
+                low_price = float(item.Low)
+                close_price = float(item.Close)
+                volume = int(item.Volume)
+                if not StockData.objects.filter(Ticker=ticker, Date=date).exists():
+                    stock_data = StockData.objects.create(
+                        Ticker=ticker,
+                        Date=date,
+                        Open=open_price,
+                        High=high_price,
+                        Low=low_price,
+                        Close=close_price,
+                        Volume=volume
+                    )
+                    stock_data.save()
+            msg = 'Success: Data for {} from {} to {} has been imported'.format(ticker, start_date, end_date)
+        except Exception as e:
+            msg = "Error importing data for {}: {}".format(ticker, e)
+        return HttpResponse(msg)
     return render(request, 'investment/import_data.html')
 
 def stock_list(request):

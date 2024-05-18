@@ -12,6 +12,7 @@ django.setup()
 from investment.models import StockData
 
 def get_data(ticker):
+    ticker = ticker.upper()
     data = yf.download(ticker, start='2024-04-01', end='2024-05-01')
     data['Ticker'] = ticker
     data = data.reset_index()
@@ -21,6 +22,7 @@ def get_data(ticker):
     return data
 
 def import_stock_data(ticker):
+    ticker = ticker.upper()
     data = get_data(ticker)
     for item in data.itertuples():
         ticker = item.Ticker
@@ -30,16 +32,17 @@ def import_stock_data(ticker):
         low_price = float(item.Low)
         close_price = float(item.Close)
         volume = int(item.Volume)
-        stock_data = StockData.objects.create(
-            Ticker=ticker,
-            Date=date,
-            Open=open_price,
-            High=high_price,
-            Low=low_price,
-            Close=close_price,
-            Volume=volume
-        )
-        stock_data.save()
+        if not StockData.objects.filter(Ticker=ticker, Date=date).exists():
+            stock_data = StockData.objects.create(
+                Ticker=ticker,
+                Date=date,
+                Open=open_price,
+                High=high_price,
+                Low=low_price,
+                Close=close_price,
+                Volume=volume
+            )
+            stock_data.save()
 
 
 if __name__ == '__main__':
