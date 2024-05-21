@@ -13,4 +13,5 @@ urlpatterns = [
     path('stock-list/', views.stock_list, name='stock_list'),
     path('stock-detail/<str:ticker>/', views.stock_detail, name='stock_detail'),
     path('backtest/', views.backtest, name='backtest'),
+    path('backtest-result/', views.backtest_results, name='backtest_results'),
 ]

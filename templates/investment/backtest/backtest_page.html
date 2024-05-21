@@ -21,37 +21,28 @@
     <h2>Backtest Services</h2>
     <p>Welcome to our investment services page. Choose an option below to continue:</p>
 
-    <form method="post">
+    <form method="post" action="{% url 'backtest' %}">
         {% csrf_token %}
-
-        <label for="stock_list">Stock List:</label>
-        <select id="stock_list" name="stock_list">
-            <option value="" disabled selected>Please choose options</option>
-            {% for ticker in tickers %}
-                <option value="{{ ticker }}">{{ ticker }}</option>
-            {% endfor %}
-        </select>
-        <br><br>
-
         <label for="backtest_type">Backtest Type:</label>
         <select id="backtest_type" name="backtest_type" onchange="this.form.submit()">
             <option value="" disabled selected>Please choose options</option>
             <option value="avg" {% if show_avg_form %}selected{% endif %}>Average</option>
         </select>
         <br><br>
-
-        {% if show_avg_form %}
-        <div id="avg_backtest_form">
-            <label for="days">Days:</label>
-            <input type="number" id="days" name="days" min="1" max="30">
-            <br><br>
-
-            <label for="amount">Amount:</label>
-            <input type="number" id="amount" name="amount" min="1">
-            <br><br>
-        </div>
-        {% endif %}
-
-        <input type="submit" value="Submit" class="button">
-    </form>
+    
+    {% if show_avg_form %}
+    <div id="avg_backtest_form">
+        <label for="ticker">Ticker:</label>
+        {{ form.ticker }}
+        <br><br>
+        <label for="days">Days:</label>
+        {{ form.days }}
+        <br><br>
+        <label for="amount">Amount:</label>
+        {{ form.amount }}
+        <br><br>
+    </div>
+    {% endif %}
+    <input type="submit" value="Submit" class="button">
+</form>
 {% endblock %}

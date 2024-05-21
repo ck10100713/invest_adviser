@@ -1,0 +1,19 @@
+<!-- backtest_result.html -->
+{% extends 'base.html' %}
+
+{% block title %}Results{% endblock %}
+
+{% block content %}
+    <h1>Results</h1>
+    <p>Stock Ticker: {{ stock_ticker }}</p>
+    <p>Strategy: {{ strategy }}</p>
+    <p>Strategy Parameters: {{ strategy_parameters }}</p>
+    <p>Total Cost: {{ total_cost }}</p>
+    <p>Total Revenue: {{ total_revenue }}</p>
+
+    <h2>Price Movement and Trades</h2>
+    <img src="{{ price_movement_image }}" alt="Price Movement and Trades">
+
+    <h2>Cost and Revenue Trends</h2>
+    <img src="{{ cost_revenue_image }}" alt="Cost and Revenue Trends">
+{% endblock %}

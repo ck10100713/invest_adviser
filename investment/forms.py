@@ -1,5 +1,6 @@
 from django import forms
 from django.utils.translation import gettext_lazy as _ # 新增
+from .models import StockData
 
 class InvestmentForm(forms.Form):
     name = forms.CharField(label=_('Name'), max_length=100)
@@ -20,3 +21,20 @@ class ReturnCalculatorForm(forms.Form):
     amount = forms.DecimalField(label="Investment Amount", max_digits=12, decimal_places=2)
     months = forms.IntegerField(label="Number of Months")
     rate = forms.DecimalField(label="Expected Return Rate (%)", max_digits=5, decimal_places=2)
+
+class AvgStragetyForm(forms.Form):
+    ticker = forms.ChoiceField(
+        choices=[(ticker, ticker) for ticker in StockData.objects.values_list('Ticker', flat=True).distinct()],
+        required=True,
+        label="Stock List"
+    )
+    days = forms.IntegerField(min_value=1, max_value=30, required=False)
+    amount = forms.IntegerField(min_value=1, required=False)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        backtest_type = self.data.get('backtest_type')
+        if backtest_type == 'avg':
+            if not cleaned_data.get('days') or not cleaned_data.get('amount'):
+                raise forms.ValidationError('Days 和 Amount 是必須的')
+        return cleaned_data
