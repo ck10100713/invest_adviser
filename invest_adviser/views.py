@@ -4,6 +4,9 @@ from django.contrib.auth.forms import UserCreationForm
 from django.core.mail import send_mail
 from django.conf import settings
 from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import logout
+from .forms import EditProfileForm
 
 # Create your views here.
 
@@ -29,7 +32,7 @@ def contact_view(request):
         name = request.POST.get('name')
         email = request.POST.get('email')
         message = request.POST.get('message')
-        
+
         # 這裡你可以添加邏輯來處理表單數據，例如發送郵件
         send_mail(
             f"Contact Form Submission from {name}",
@@ -38,5 +41,32 @@ def contact_view(request):
             [settings.DEFAULT_FROM_EMAIL],  # 發送到你的郵箱
         )
         return HttpResponse("Thank you for your message.")
-    
+
     return render(request, 'contact.html')
+
+@login_required
+def member_center(request):
+    return render(request, 'member_center.html', {
+        'user': request.user
+    })
+
+@login_required
+def view_profile(request):
+    return render(request, 'view_profile.html', {
+        'user': request.user
+    })
+
+def logout_view(request):
+    logout(request)
+    return redirect('home')  # 假設你的主頁 URL 名稱為 'home'
+
+@login_required
+def edit_profile(request):
+    if request.method == 'POST':
+        form = EditProfileForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            return redirect('view_profile')  # 假設有個用於顯示用戶資料的視圖
+    else:
+        form = EditProfileForm(instance=request.user)
+    return render(request, 'edit_profile.html', {'form': form})

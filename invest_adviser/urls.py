@@ -28,4 +28,8 @@ urlpatterns = [
     path('welcome/', include('welcome.urls')),
     path('about/', views.about_view, name='about'),
     path('contact/', views.contact_view, name='contact'),
+    path('member_center/', views.member_center, name='member_center'),
+    path('view_profile/', views.view_profile, name='view_profile'),
+    path('edit_profile/', views.edit_profile, name='edit_profile'),
+    path('logout/', views.logout_view, name='logout'),
 ]
