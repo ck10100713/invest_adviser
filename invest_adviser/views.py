@@ -58,7 +58,7 @@ def view_profile(request):
 
 def logout_view(request):
     logout(request)
-    return redirect('home')  # 假設你的主頁 URL 名稱為 'home'
+    return redirect('index')
 
 @login_required
 def edit_profile(request):
@@ -66,7 +66,6 @@ def edit_profile(request):
         form = EditProfileForm(request.POST, instance=request.user)
         if form.is_valid():
             form.save()
-            return redirect('view_profile')  # 假設有個用於顯示用戶資料的視圖
-    else:
+            return redirect('view_profile')
         form = EditProfileForm(instance=request.user)
     return render(request, 'edit_profile.html', {'form': form})

@@ -118,20 +118,16 @@ def stock_list(request):
     return render(request, 'investment/stock_list.html', {'ticker_list': ticker_list})
 
 def stock_detail(request, ticker):
-    # 获取股票的最新日期、收盘价和成交量
     latest_data = StockData.objects.filter(Ticker=ticker).latest('Date')
     latest_date = latest_data.Date
     latest_close = latest_data.Close
     latest_volume = latest_data.Volume
 
-    # 获取股票的历史数据
     historical_data = StockData.objects.filter(Ticker=ticker).order_by('Date')
 
-    # 提取日期和收盘价数据
     dates = [data.Date for data in historical_data]
     prices = [data.Close for data in historical_data]
 
-    # 绘制股票走势图
     fig, ax = plt.subplots()
     ax.plot(dates, prices)
     ax.set(xlabel='Date', ylabel='Price', title='Stock Price Trend')
@@ -141,13 +137,10 @@ def stock_detail(request, ticker):
     # save_folder = 'charts'
     # os.makedirs(save_folder, exist_ok=True)
 
-    # # 保存图表到本地
     # save_path = os.path.join(save_folder, '{}_chart.png'.format(ticker))
     # plt.savefig(save_path, format='png')
 
-    # # 关闭图表
     # plt.close()
-    # # 将图像转换为 base64 编码的字符串
     # with open(save_path, "rb") as image_file:
     #     image_data = base64.b64encode(image_file.read()).decode('utf-8')
 
@@ -158,7 +151,6 @@ def stock_detail(request, ticker):
     buffer.close()
     image_data = f"data:image/png;base64,{image_base64}"
 
-    # 将数据传递给模板
     return render(request, 'investment/stock_list/stock_detail.html', {
         'ticker': ticker,
         'latest_date': latest_date,
@@ -176,8 +168,11 @@ def backtest(request):
             show_avg_form = True
         if form.is_valid():
             ticker = form.cleaned_data['ticker']
+            start_date = form.cleaned_data['start_date']
+            end_date = form.cleaned_data['end_date']
             days = form.cleaned_data['days']
             amount = form.cleaned_data['amount']
+            data = get_data_from_db(ticker, start_date, end_date)
             strategy = [backtest_type, ticker, [days, amount]]
             return_data = cal_strategry_return(strategy)
             return backtest_results(request, strategy, return_data)
@@ -187,48 +182,6 @@ def backtest(request):
         'form': form,
         'show_avg_form': show_avg_form
     })
-
-# def backtest(request):
-#     tickers = StockData.objects.values_list('Ticker', flat=True).distinct()
-#     show_avg_form = False
-#     print('post = {}'.format(request.POST))
-#     if request.method == 'POST':
-#         form = AvgStragetyForm(request.POST)
-#         print('form = {}'.format(form))
-#         if form.is_valid():
-#             ticker = form.cleaned_data['ticker']
-#             days = form.cleaned_data['days']
-#             amount = form.cleaned_data['amount']
-#             print(ticker, days, amount)
-#         backtest_type = request.POST.get('backtest_type')
-#         if backtest_type:
-#             if backtest_type == 'avg':
-#                 print('avg')
-#                 show_avg_form = True
-#             return render(request, 'investment/backtest/backtest_page.html', {'tickers': tickers, 'show_avg_form': show_avg_form, 'form': form})
-#     else:
-#         form = AvgStragetyForm()
-#     return render(request, 'investment/backtest/backtest_page.html', {'tickers': tickers, 'show_avg_form': show_avg_form, 'form': form})
-
-# def backtest(request):
-#     tickers = StockData.objects.values_list('Ticker', flat=True).distinct()
-#     show_avg_form = False
-#     show_stock_list = False
-#     if request.method == 'POST':
-#         backtest_type = request.POST.get('backtest_type')
-#         if backtest_type:
-#             show_stock_list = True
-#             if backtest_type == 'avg':
-#                 show_avg_form = True
-#         if request.POST.get('backtest_submit'):
-#             print('submit')
-#             ticker = request.POST.get('ticker')
-#             start_date = request.POST.get('start_date')
-#             end_date = request.POST.get('end_date')
-#             strategy = request.POST.get('strategy')
-#             return_rate = cal_strategry_return(ticker, start_date, end_date, strategy)
-#             return render(request, 'investment/backtest/backtest_results.html', {'return_rate': return_rate})
-#     return render(request, 'investment/backtest/backtest_page.html', {'tickers': tickers, 'show_avg_form': show_avg_form, 'show_stock_list': show_stock_list})
 
 def backtest_results(request, strategy, return_data):
     ticker = return_data['Ticker'][0]
@@ -240,8 +193,8 @@ def backtest_results(request, strategy, return_data):
     cost_revenue_image = generate_cost_revenue_image(return_data)
 
     return render(request, 'investment/backtest/backtest_results.html', {'ticker': ticker, 'strategy': strategy, 'strategy_parameters': strategy_parameters,
-                                                                         'total_cost': total_cost, 'total_revenue': total_revenue,
-                                                                         'price_movement_image': price_movement_image, 'cost_revenue_image': cost_revenue_image})
+                'total_cost': total_cost, 'total_revenue': total_revenue,
+                'price_movement_image': price_movement_image, 'cost_revenue_image': cost_revenue_image})
 def generate_price_movement_image(data):
     plt.figure(figsize=plt_size)
     plt.plot(data['Date'], data['Close'], label='Close Price', color='black')
@@ -290,8 +243,7 @@ def cal_avg_return(ticker, days, amount):
     data = get_data_from_db(ticker)
     choosen_day = days
     monthly_amount = amount
-    filtered_data = data
-    
+    filtered_data = data.copy()
     filtered_data['shares'] = 0
     filtered_data.loc[filtered_data['Day'] == choosen_day, 'shares'] = monthly_amount // (filtered_data.loc[filtered_data['Day'] == choosen_day, 'Close'])
     filtered_data['cost'] = filtered_data['shares'] * filtered_data['Close']
@@ -299,8 +251,6 @@ def cal_avg_return(ticker, days, amount):
     filtered_data['amount'] = filtered_data['cumulative_shares'] * filtered_data['Close']
     filtered_data['cumulative_cost'] = filtered_data['cost'].cumsum()
     filtered_data['return'] = filtered_data['amount'] - filtered_data['cumulative_cost']
-    # print(filtered_data.tail())
-    # filtered_data['return_percent'] = filtered_data['return'] / filtered_data['cumulative_cost'] * 100
     return filtered_data
 
 def cal_strategry_return(strategy):
