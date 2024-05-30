@@ -172,8 +172,8 @@ def backtest(request):
             end_date = form.cleaned_data['end_date']
             days = form.cleaned_data['days']
             amount = form.cleaned_data['amount']
-            data = get_data_from_db(ticker, start_date, end_date)
-            strategy = [backtest_type, ticker, [days, amount]]
+            # data = get_data_from_db(ticker, start_date, end_date)
+            strategy = [backtest_type, ticker, start_date, end_date, [days, amount]]
             return_data = cal_strategry_return(strategy)
             return backtest_results(request, strategy, return_data)
     else:
@@ -228,7 +228,7 @@ def generate_cost_revenue_image(data):
     image_data = f"data:image/png;base64,{image_base64}"
     return image_data
 
-def get_data_from_db(ticker):
+def get_data_from_db(ticker, start_date = None, end_date = None):
     ticker = ticker.upper()
     data = StockData.objects.filter(Ticker=ticker).order_by('Date')
     data = pd.DataFrame(list(data.values()))
@@ -239,8 +239,8 @@ def get_data_from_db(ticker):
     data = data.reindex(columns=['Ticker', 'Date', 'Year', 'Month', 'Day', 'Open', 'High', 'Low', 'Close', 'Volume'])
     return data
 
-def cal_avg_return(ticker, days, amount):
-    data = get_data_from_db(ticker)
+def cal_avg_return(ticker, start_date = None, end_date = None,days, amount):
+    data = get_data_from_db(ticker, start_date, end_date)
     choosen_day = days
     monthly_amount = amount
     filtered_data = data.copy()
@@ -256,7 +256,9 @@ def cal_avg_return(ticker, days, amount):
 def cal_strategry_return(strategy):
     strategy_type = strategy[0]
     ticker = strategy[1]
+    start_date = strategy[2]
+    end_date = strategy[3]
     if strategy_type == 'avg':
-        days = strategy[2][0]
-        amount = strategy[2][1]
-        return cal_avg_return(ticker, days, amount)
+        days = strategy[4][0]
+        amount = strategy[4][1]
+        return cal_avg_return(ticker, start_date, end_date, days, amount)
