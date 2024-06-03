@@ -22,14 +22,25 @@ class ReturnCalculatorForm(forms.Form):
     months = forms.IntegerField(label="Number of Months")
     rate = forms.DecimalField(label="Expected Return Rate (%)", max_digits=5, decimal_places=2)
 
-class AvgStragetyForm(forms.Form):
+# class StrategyForm(forms.Form):
+#     strategy = forms.ChoiceField()
+
+class StragetyForm(forms.Form):
     ticker = forms.ChoiceField(
         choices=[(ticker, ticker) for ticker in StockData.objects.values_list('Ticker', flat=True).distinct()],
         required=True,
         label="Stock List"
     )
+    # for avg
     days = forms.IntegerField(min_value=1, max_value=30, required=False)
     amount = forms.IntegerField(min_value=1, required=False)
+    # for avg
+
+    # for bb
+    std_dev = forms.IntegerField(min_value=1, required=False)
+    # for bb
+    start_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}), required=False)
+    end_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}), required=False)
 
     def clean(self):
         cleaned_data = super().clean()

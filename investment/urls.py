@@ -1,9 +1,6 @@
 from django.contrib import admin
 from django.urls import path, include
 from . import views
-# from .views import investment
-# from .views import calculate_and_show_results, calculate_dollar_cost_averaging
-# from .views import stock_list, stock_detail
 
 urlpatterns = [
     path('', views.investment, name='investment'),

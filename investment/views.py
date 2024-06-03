@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.forms import UserCreationForm
-from .forms import InvestmentForm, ReturnCalculatorForm, AvgStragetyForm
+from .forms import InvestmentForm, ReturnCalculatorForm, StragetyForm
 from .models import StockData
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
@@ -13,6 +13,10 @@ import datetime as dt
 import pandas as pd
 import yfinance as yf
 from io import BytesIO, StringIO
+import plotly.graph_objs as go
+import plotly.express as px
+import plotly.offline as pyo
+import numpy as np
 
 plt_size = (8,6)
 
@@ -104,7 +108,7 @@ def import_data_view(request):
                         High=high_price,
                         Low=low_price,
                         Close=close_price,
-                        Volume=volume
+                        Volume=volume//100
                     )
                     stock_data.save()
             msg = 'Success: Data for {} from {} to {} has been imported'.format(ticker, start_date, end_date)
@@ -117,55 +121,117 @@ def stock_list(request):
     ticker_list = StockData.objects.values_list('Ticker', flat=True).distinct()
     return render(request, 'investment/stock_list.html', {'ticker_list': ticker_list})
 
+# def stock_detail(request, ticker):
+#     latest_data = StockData.objects.filter(Ticker=ticker).latest('Date')
+#     latest_date = latest_data.Date
+#     latest_close = latest_data.Close
+#     latest_volume = latest_data.Volume
+
+#     historical_data = StockData.objects.filter(Ticker=ticker).order_by('Date')
+
+#     dates = [data.Date for data in historical_data]
+#     prices = [data.Close for data in historical_data]
+
+#     fig, ax = plt.subplots()
+#     ax.plot(dates, prices)
+#     ax.set(xlabel='Date', ylabel='Price', title='Stock Price Trend')
+#     ax.grid()
+
+#     # another way to save the chart
+#     # save_folder = 'charts'
+#     # os.makedirs(save_folder, exist_ok=True)
+
+#     # save_path = os.path.join(save_folder, '{}_chart.png'.format(ticker))
+#     # plt.savefig(save_path, format='png')
+
+#     # plt.close()
+#     # with open(save_path, "rb") as image_file:
+#     #     image_data = base64.b64encode(image_file.read()).decode('utf-8')
+
+#     buffer = io.BytesIO()
+#     plt.savefig(buffer, format='png')
+#     buffer.seek(0)
+#     image_base64 = base64.b64encode(buffer.getvalue()).decode()
+#     buffer.close()
+#     image_data = f"data:image/png;base64,{image_base64}"
+
+#     return render(request, 'investment/stock_list/stock_detail.html', {
+#         'ticker': ticker,
+#         'latest_date': latest_date,
+#         'latest_close': latest_close,
+#         'latest_volume': latest_volume,
+#         'graphic': image_data
+#     })
+
 def stock_detail(request, ticker):
+
     latest_data = StockData.objects.filter(Ticker=ticker).latest('Date')
     latest_date = latest_data.Date
     latest_close = latest_data.Close
     latest_volume = latest_data.Volume
 
-    historical_data = StockData.objects.filter(Ticker=ticker).order_by('Date')
+    # 获取数据
+    data = StockData.objects.filter(Ticker=ticker).order_by('Date')
+    df = pd.DataFrame(list(data.values('Date', 'Close', 'Volume')))
 
-    dates = [data.Date for data in historical_data]
-    prices = [data.Close for data in historical_data]
+    # 检查 DataFrame 是否为空
+    if df.empty:
+        return render(request, 'investment/stock_detail.html', {
+            'ticker': ticker,
+            'error': 'No data available for this ticker.'
+        })
 
-    fig, ax = plt.subplots()
-    ax.plot(dates, prices)
-    ax.set(xlabel='Date', ylabel='Price', title='Stock Price Trend')
-    ax.grid()
+    # 创建价格线图
+    price_trace = go.Scatter(
+        x=df['Date'],
+        y=df['Close'],
+        mode='lines',
+        name='Stock Price',
+        text=df.apply(lambda row: f"Date: {row['Date'].strftime('%Y-%m-%d')}<br>Close: {row['Close']}", axis=1),
+        hoverinfo='text'
+    )
 
-    # another way to save the chart
-    # save_folder = 'charts'
-    # os.makedirs(save_folder, exist_ok=True)
+    # 创建成交量柱状图
+    volume_trace = go.Bar(
+        x=df['Date'],
+        y=df['Volume'],
+        name='Volume',
+        yaxis='y2',
+        opacity=0.8,
+        marker_color='rgba(50, 171, 96, 0.8)',
+        text=df.apply(lambda row: f"Date: {row['Date'].strftime('%Y-%m-%d')}<br>Volume: {row['Volume']}", axis=1),
+        hoverinfo='text'
+    )
 
-    # save_path = os.path.join(save_folder, '{}_chart.png'.format(ticker))
-    # plt.savefig(save_path, format='png')
+    # 创建图表
+    fig = go.Figure()
+    fig.add_trace(price_trace)
+    fig.add_trace(volume_trace)
 
-    # plt.close()
-    # with open(save_path, "rb") as image_file:
-    #     image_data = base64.b64encode(image_file.read()).decode('utf-8')
+    fig.update_layout(
+        title=f'Stock Price and Volume Over Time for {ticker}',
+        xaxis=dict(title='Date'),
+        yaxis=dict(title='Close Price'),
+        yaxis2=dict(title='Volume', overlaying='y', side='right'),
+        legend=dict(x=0, y=1.2, orientation='h'),
+        hovermode='x'
+    )
 
-    buffer = io.BytesIO()
-    plt.savefig(buffer, format='png')
-    buffer.seek(0)
-    image_base64 = base64.b64encode(buffer.getvalue()).decode()
-    buffer.close()
-    image_data = f"data:image/png;base64,{image_base64}"
+    fig_html = pyo.plot(fig, include_plotlyjs=True, output_type='div')
 
     return render(request, 'investment/stock_list/stock_detail.html', {
         'ticker': ticker,
         'latest_date': latest_date,
         'latest_close': latest_close,
         'latest_volume': latest_volume,
-        'graphic': image_data
+        'graphic': fig_html
     })
 
 def backtest(request):
-    show_avg_form = False
+    backtest_type = None
     if request.method == 'POST':
-        form = AvgStragetyForm(request.POST)
+        form = StragetyForm(request.POST)
         backtest_type = request.POST.get('backtest_type')
-        if backtest_type == 'avg':
-            show_avg_form = True
         if form.is_valid():
             ticker = form.cleaned_data['ticker']
             start_date = form.cleaned_data['start_date']
@@ -173,26 +239,30 @@ def backtest(request):
             days = form.cleaned_data['days']
             amount = form.cleaned_data['amount']
             # data = get_data_from_db(ticker, start_date, end_date)
-            strategy = [backtest_type, ticker, start_date, end_date, [days, amount]]
-            return_data = cal_strategry_return(strategy)
-            return backtest_results(request, strategy, return_data)
+            strategy_parms = [backtest_type, ticker, start_date, end_date, [days, amount]]
+            return_data = cal_strategry_return(strategy_parms)
+            return backtest_results(request, strategy_parms, return_data)
     else:
-        form = AvgStragetyForm()
+        form = StragetyForm()
     return render(request, 'investment/backtest/backtest_page.html', {
         'form': form,
-        'show_avg_form': show_avg_form
+        'backtest_type': backtest_type
     })
 
-def backtest_results(request, strategy, return_data):
-    ticker = return_data['Ticker'][0]
-    strategy = strategy[0]
-    strategy_parameters = strategy[2]
+def backtest_results(request, strategy_parms, return_data):
+
+    strategy_type = strategy_parms[0]
+    ticker = strategy_parms[1]
+    start_date = strategy_parms[2]
+    end_date = strategy_parms[3]
+    strategy_parameters = strategy_parms[4]
     total_cost = return_data['cumulative_cost'].iloc[-1]
     total_revenue = return_data['amount'].iloc[-1]
     price_movement_image = generate_price_movement_image(return_data)
     cost_revenue_image = generate_cost_revenue_image(return_data)
 
-    return render(request, 'investment/backtest/backtest_results.html', {'ticker': ticker, 'strategy': strategy, 'strategy_parameters': strategy_parameters,
+    return render(request, 'investment/backtest/backtest_results.html', {'ticker': ticker, 'strategy_type': strategy_type, 'strategy_parameters': strategy_parameters,
+                'start_date': start_date, 'end_date': end_date,
                 'total_cost': total_cost, 'total_revenue': total_revenue,
                 'price_movement_image': price_movement_image, 'cost_revenue_image': cost_revenue_image})
 def generate_price_movement_image(data):
@@ -230,7 +300,10 @@ def generate_cost_revenue_image(data):
 
 def get_data_from_db(ticker, start_date = None, end_date = None):
     ticker = ticker.upper()
-    data = StockData.objects.filter(Ticker=ticker).order_by('Date')
+    if start_date and end_date:
+        data = StockData.objects.filter(Ticker=ticker, Date__range=[start_date, end_date]).order_by('Date')
+    else:
+        data = StockData.objects.filter(Ticker=ticker).order_by('Date')
     data = pd.DataFrame(list(data.values()))
     data['Date'] = pd.to_datetime(data['Date'])
     data['Year'] = data['Date'].dt.year
@@ -239,7 +312,7 @@ def get_data_from_db(ticker, start_date = None, end_date = None):
     data = data.reindex(columns=['Ticker', 'Date', 'Year', 'Month', 'Day', 'Open', 'High', 'Low', 'Close', 'Volume'])
     return data
 
-def cal_avg_return(ticker, start_date = None, end_date = None,days, amount):
+def cal_avg_return(ticker, days, amount, start_date = None, end_date = None):
     data = get_data_from_db(ticker, start_date, end_date)
     choosen_day = days
     monthly_amount = amount
@@ -258,7 +331,7 @@ def cal_strategry_return(strategy):
     ticker = strategy[1]
     start_date = strategy[2]
     end_date = strategy[3]
-    if strategy_type == 'avg':
+    if strategy_type == 'AVG':
         days = strategy[4][0]
         amount = strategy[4][1]
-        return cal_avg_return(ticker, start_date, end_date, days, amount)
+        return cal_avg_return(ticker, days, amount, start_date, end_date)

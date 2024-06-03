@@ -5,9 +5,14 @@
 
 {% block content %}
     <h1>Results</h1>
-    <p>Stock Ticker: {{ stock_ticker }}</p>
-    <p>Strategy: {{ strategy }}</p>
-    <p>Strategy Parameters: {{ strategy_parameters }}</p>
+    <p>Stock Ticker: {{ ticker }}</p>
+    {% if strategy_type == 'AVG' %}
+        <p>Strategy Type: 定期定額</p>
+        <p>Strategy Parameters: [日期,金額] = {{ strategy_parameters }}</p>
+    {% endif %}
+    
+    <p>Start Date: {{ start_date }}</p>
+    <p>End Date: {{ end_date }}</p>
     <p>Total Cost: {{ total_cost }}</p>
     <p>Total Revenue: {{ total_revenue }}</p>
 
